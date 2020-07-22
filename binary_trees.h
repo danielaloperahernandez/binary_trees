@@ -33,6 +33,19 @@ typedef struct binary_tree_s heap_t;
 /*Binary tree print*/
 void binary_tree_print(const binary_tree_t *);
 
+/**
+ * fifo_t - typedef for struct fifo_s to represent a fifo queue
+ * @node: pointer to node of binary tree
+ * @next: pointer to next element of queue
+ * @prev: pointer to previous element of queue
+ */
+typedef struct fifo_s
+{
+	const binary_tree_t *node;
+	struct fifo_s *next;
+	struct fifo_s *prev;
+} fifo_t;
+
 /*Prototypes for every task*/
 binary_tree_t *binary_tree_node(binary_tree_t *parent, int value);
 binary_tree_t *binary_tree_insert_left(binary_tree_t *parent, int value);
@@ -54,4 +67,6 @@ int binary_tree_is_perfect(const binary_tree_t *tree);
 binary_tree_t *binary_tree_sibling(binary_tree_t *node);
 binary_tree_t *binary_tree_uncle(binary_tree_t *node);
 binary_tree_t *binary_trees_ancestor(const binary_tree_t *first, const binary_tree_t *second);
+void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int));
+int binary_tree_is_complete(const binary_tree_t *tree);
 #endif /* BINARY_TREES_H */
