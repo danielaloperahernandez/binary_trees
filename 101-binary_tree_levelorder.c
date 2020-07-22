@@ -1,61 +1,77 @@
 #include "binary_trees.h"
 
-#define max(a, b) ((a) >= (b) ? (a) : (b))
-
 /**
- * binary_tree_height - function that measures the height of a binary tree
- * @tree:  is a pointer to the root node of the tree to measure the height
- * Return: tree is NULL, your function must return 0
+ * push - subroutine to push new nodes from traversal onto fifo queue
+ * @head: pointer to head of fifo
+ * @tail: pointer to tail of fifo
+ * @node: node to add to queue
  */
-
-size_t binary_tree_height(const binary_tree_t *tree)
+void push(fifo_t **head, fifo_t **tail, const binary_tree_t *node)
 {
-	if (tree == NULL || (tree->left == NULL && tree->right == NULL))
-		return (0);
+	fifo_t *new;
 
-	return (1 + max(binary_tree_height(tree->left),
-				binary_tree_height(tree->right)));
-}
-
-/**
- * func_level - function that applies the function pointer
- * to each element of the level
- * a binary tree using level-order traversal
- * @tree: is a pointer to the root node of the tree to traverse
- * @level: level in the tree
- * @func: is a pointer to a function to call for each node
- */
-
-void func_level(const binary_tree_t *tree, size_t level, void (*func)(int))
-{
-	if (!tree)
+	if (head == NULL || node == NULL)
 		return;
-
-	if (level == 0)
-		func(tree->n);
+	new = malloc(sizeof(fifo_t));
+	if (new == NULL)
+		return;
+	new->node = node;
+	new->next = *head;
+	new->prev = NULL;
+	if (*head == NULL)
+		*tail = new;
 	else
-	{
-		func_level(tree->left, level - 1, func);
-		func_level(tree->right, level - 1, func);
-	}
+		(*head)->prev = new;
+	*head = new;
 }
+
 /**
- * binary_tree_levelorder - function that goes through
- * a binary tree using level-order traversal
- * @tree: is a pointer to the root node of the tree to traverse
- * @func: is a pointer to a function to call for each node
+ * pop - subroutine to pop nodes from the tail of a fifo queue
+ * @head: pointer to head of queue
+ * @tail: pointer to tail of queue
+ *
+ * Return: pointer to popped node, or NULL if it does not exist
+ */
+const binary_tree_t *pop(fifo_t **head, fifo_t **tail)
+{
+	fifo_t *last;
+	binary_tree_t *node;
+
+	if (tail == NULL || *tail == NULL)
+		return (NULL);
+	last = *tail;
+	*tail = (*tail)->prev;
+	if (*tail == NULL)
+		*head = NULL;
+	else
+		(*tail)->next = NULL;
+	node = (binary_tree_t *) last->node;
+	free(last);
+	return ((const binary_tree_t *) node);
+}
+
+/**
+ * binary_tree_levelorder - level-order binary tree traversal
+ * @tree: root of tree to traverse
+ * @func: function to call on values of visited nodes
  */
 void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
 {
-	size_t height, level;
+	fifo_t *head, *tail;
+	binary_tree_t *node;
 
-	if (!tree || !func)
+	head = tail = NULL;
+	if (tree == NULL || func == NULL)
 		return;
-
-	height =  binary_tree_height(tree);
-
-	for (level = 0; level <= height; level++)
+	push(&head, &tail, tree);
+	while (head)
 	{
-		func_level(tree, level, func);
+		node = (binary_tree_t *) pop(&head, &tail);
+		if (node)
+		{
+			push(&head, &tail, (const binary_tree_t *) node->left);
+			push(&head, &tail, (const binary_tree_t *) node->right);
+			func(node->n);
+		}
 	}
 }
